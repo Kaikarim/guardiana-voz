@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
+  <meta
+    name="theme-color"
+    content="#643232"
+  >
+
+  <title>Guardiana · Voz</title>
+
+
+  <style>
+
+    @import url(
+      'https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap'
+    );
+
+
+    :root {
+
+      --accent:
+        #643232;
+
+      --accent-soft:
+        #ffeeee;
+
+      --text:
+        #1c1d21;
+
+      --soft:
+        #737781;
+
+      --surface:
+        #ffffff;
+
+      --bg:
+        #f7f5f5;
+
+    }
+
+
+    * {
+      box-sizing:
+        border-box;
+    }
+
+
+    body {
+
+      margin:
+        0;
+
+      min-height:
+        100vh;
+
+      display:
+        grid;
+
+      place-items:
+        center;
+
+      padding:
+        24px;
+
+      background:
+        var(--bg);
+
+      color:
+        var(--text);
+
+      font-family:
+        'Nunito Sans',
+        sans-serif;
+
+    }
+
+
+    .voice {
+
+      width:
+        min(
+          100%,
+          420px
+        );
+
+      text-align:
+        center;
+
+    }
+
+
+    .brand {
+
+      margin-bottom:
+        40px;
+
+      color:
+        var(--accent);
+
+      font-size:
+        13px;
+
+      font-weight:
+        800;
+
+      letter-spacing:
+        .14em;
+
+    }
+
+
+    .mic {
+
+      width:
+        110px;
+
+      height:
+        110px;
+
+      margin:
+        auto;
+
+      display:
+        grid;
+
+      place-items:
+        center;
+
+      border:
+        0;
+
+      border-radius:
+        36px;
+
+      background:
+        var(--accent);
+
+      color:
+        white;
+
+      cursor:
+        pointer;
+
+      box-shadow:
+        0 20px 50px
+        rgba(100,50,50,.23);
+
+      transition:
+        transform 180ms ease,
+        box-shadow 180ms ease;
+
+    }
+
+
+    .mic:active {
+
+      transform:
+        scale(.94);
+
+    }
+
+
+    .mic.listening {
+
+      animation:
+        pulse
+        1.5s
+        infinite;
+
+    }
+
+
+    .mic svg {
+
+      width:
+        46px;
+
+      height:
+        46px;
+
+      fill:
+        none;
+
+      stroke:
+        currentColor;
+
+      stroke-width:
+        1.8;
+
+      stroke-linecap:
+        round;
+
+      stroke-linejoin:
+        round;
+
+    }
+
+
+    h1 {
+
+      margin:
+        28px 0
+        8px;
+
+      font-size:
+        28px;
+
+      font-weight:
+        800;
+
+      letter-spacing:
+        -.04em;
+
+    }
+
+
+    p {
+
+      margin:
+        0;
+
+      color:
+        var(--soft);
+
+      font-size:
+        15px;
+
+      line-height:
+        1.5;
+
+    }
+
+
+    .transcript {
+
+      min-height:
+        60px;
+
+      margin-top:
+        26px;
+
+      padding:
+        16px;
+
+      border-radius:
+        18px;
+
+      background:
+        var(--surface);
+
+      color:
+        var(--accent);
+
+      font-size:
+        15px;
+
+      font-weight:
+        700;
+
+      box-shadow:
+        0 8px 30px
+        rgba(20,20,25,.06);
+
+    }
+
+
+    .hidden {
+      display:
+        none;
+    }
+
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+
+        box-shadow:
+          0 20px 50px
+          rgba(100,50,50,.23),
+          0 0 0 0
+          rgba(100,50,50,.16);
+
+      }
+
+      50% {
+
+        box-shadow:
+          0 20px 50px
+          rgba(100,50,50,.23),
+          0 0 0 18px
+          rgba(100,50,50,0);
+
+      }
+
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+
+  <main class="voice">
+
+    <div class="brand">
+      GUARDIANA
+    </div>
+
+
+    <button
+      id="btnMic"
+      class="mic"
+      type="button"
+      aria-label="Hablar"
+    >
+
+      <svg
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+
+        <path
+          d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"
+        ></path>
+
+        <path
+          d="M19 11v1a7 7 0 0 1-14 0v-1"
+        ></path>
+
+        <path
+          d="M12 19v3"
+        ></path>
+
+      </svg>
+
+    </button>
+
+
+    <h1 id="titulo">
+      Hablame.
+    </h1>
+
+
+    <p id="estado">
+      Tocá el micrófono y decime qué tenemos que hacer.
+    </p>
+
+
+    <div
+      id="transcript"
+      class="transcript hidden"
+    ></div>
+
+  </main>
+
+
+  <script>
+
+    const PARAMS =
+      new URLSearchParams(
+        window.location.search
+      );
+
+
+    const TOKEN =
+      PARAMS.get(
+        'token'
+      ) || '';
+
+
+    const btnMic =
+      document.getElementById(
+        'btnMic'
+      );
+
+
+    const titulo =
+      document.getElementById(
+        'titulo'
+      );
+
+
+    const estado =
+      document.getElementById(
+        'estado'
+      );
+
+
+    const transcript =
+      document.getElementById(
+        'transcript'
+      );
+
+
+    let reconocimiento =
+      null;
+
+
+    btnMic.addEventListener(
+      'click',
+      escuchar
+    );
+
+
+    function escuchar() {
+
+      const SpeechRecognition =
+        window.SpeechRecognition ||
+        window.webkitSpeechRecognition;
+
+
+      if (
+        !SpeechRecognition
+      ) {
+
+        titulo.textContent =
+          'Este navegador no puede escuchar.';
+
+        estado.textContent =
+          'Probá abrir Guardiana con Chrome.';
+
+        return;
+
+      }
+
+
+      reconocimiento =
+        new SpeechRecognition();
+
+
+      reconocimiento.lang =
+        'es-AR';
+
+
+      reconocimiento.continuous =
+        false;
+
+
+      reconocimiento.interimResults =
+        true;
+
+
+      reconocimiento.maxAlternatives =
+        1;
+
+
+      reconocimiento.onstart =
+        () => {
+
+          btnMic
+            .classList
+            .add(
+              'listening'
+            );
+
+
+          titulo.textContent =
+            'Te escucho…';
+
+
+          estado.textContent =
+            'Hablá normalmente.';
+
+
+          transcript.textContent =
+            '';
+
+
+          transcript
+            .classList
+            .remove(
+              'hidden'
+            );
+
+        };
+
+
+      reconocimiento.onresult =
+        evento => {
+
+          let completo =
+            '';
+
+          let definitivo =
+            '';
+
+
+          for (
+            let i = 0;
+            i < evento.results.length;
+            i++
+          ) {
+
+            const resultado =
+              evento.results[i];
+
+
+            const texto =
+              String(
+                resultado[0]?.transcript || ''
+              )
+                .trim();
+
+
+            if (
+              !texto
+            ) {
+              continue;
+            }
+
+
+            completo +=
+              (
+                completo
+                  ? ' '
+                  : ''
+              ) +
+              texto;
+
+
+            if (
+              resultado.isFinal
+            ) {
+
+              definitivo +=
+                (
+                  definitivo
+                    ? ' '
+                    : ''
+                ) +
+                texto;
+
+            }
+
+          }
+
+
+          transcript.textContent =
+            completo;
+
+
+          if (
+            definitivo
+          ) {
+
+            enviarAGuardiana(
+              definitivo.trim()
+            );
+
+          }
+
+        };
+
+
+      reconocimiento.onerror =
+        evento => {
+
+          btnMic
+            .classList
+            .remove(
+              'listening'
+            );
+
+
+          console.error(
+            evento.error
+          );
+
+
+          if (
+            evento.error ===
+              'not-allowed'
+          ) {
+
+            titulo.textContent =
+              'Necesito permiso.';
+
+            estado.textContent =
+              'Permití el micrófono para esta página y tocá nuevamente.';
+
+            return;
+
+          }
+
+
+          if (
+            evento.error ===
+              'no-speech'
+          ) {
+
+            titulo.textContent =
+              'No escuché nada.';
+
+            estado.textContent =
+              'Probemos otra vez.';
+
+            return;
+
+          }
+
+
+          titulo.textContent =
+            'Algo salió tímido.';
+
+          estado.textContent =
+            'Volvé a tocar el micrófono.';
+
+        };
+
+
+      reconocimiento.onend =
+        () => {
+
+          btnMic
+            .classList
+            .remove(
+              'listening'
+            );
+
+        };
+
+
+      try {
+
+        reconocimiento.start();
+
+      }
+
+      catch (error) {
+
+        console.error(
+          error
+        );
+
+      }
+
+    }
+
+
+
+    function enviarAGuardiana(
+      texto
+    ) {
+
+      if (
+        !texto ||
+        !TOKEN
+      ) {
+        return;
+      }
+
+
+      titulo.textContent =
+        'Perfecto.';
+
+
+      estado.textContent =
+        'Volviendo a Guardiana…';
+
+
+      if (
+        window.opener
+      ) {
+
+        window.opener.postMessage(
+          {
+
+            tipo:
+              'GUARDIANA_VOZ',
+
+            token:
+              TOKEN,
+
+            texto:
+              texto
+
+          },
+          '*'
+        );
+
+      }
+
+
+      window.setTimeout(
+        () => {
+
+          window.close();
+
+        },
+        450
+      );
+
+    }
+
+  </script>
+
+</body>
+
+</html>
