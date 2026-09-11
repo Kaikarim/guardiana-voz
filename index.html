@@ -652,59 +652,50 @@
 
 
 
-    function enviarAGuardiana(
-      texto
-    ) {
+function enviarAGuardiana(
+  texto
+) {
 
-      if (
-        !texto ||
-        !TOKEN
-      ) {
-        return;
-      }
-
-
-      titulo.textContent =
-        'Perfecto.';
+  const transcripcion =
+    String(
+      texto || ''
+    )
+      .trim();
 
 
-      estado.textContent =
-        'Volviendo a Guardiana…';
+  if (
+    !transcripcion
+  ) {
+    return;
+  }
 
 
-      if (
-        window.opener
-      ) {
-
-        window.opener.postMessage(
-          {
-
-            tipo:
-              'GUARDIANA_VOZ',
-
-            token:
-              TOKEN,
-
-            texto:
-              texto
-
-          },
-          '*'
-        );
-
-      }
+  titulo.textContent =
+    'Perfecto.';
 
 
-      window.setTimeout(
-        () => {
+  estado.textContent =
+    'Volviendo a Guardiana…';
 
-          window.close();
 
-        },
-        450
-      );
+  /**
+   * La transcripción viaja en el fragmento #.
+   *
+   * No forma parte del request HTTP al servidor.
+   */
+  const retorno =
+    GUARDIANA_URL +
+    '#voz=' +
+    encodeURIComponent(
+      transcripcion
+    );
 
-    }
+
+  window.location.replace(
+    retorno
+  );
+
+}
 
   </script>
 
